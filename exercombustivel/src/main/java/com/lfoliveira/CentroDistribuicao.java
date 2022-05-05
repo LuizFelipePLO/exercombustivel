@@ -33,10 +33,10 @@ public class CentroDistribuicao {
     // encomendaCombustível.
     public void defineSituacao() {
         if (getAditivo() < (MAX_ADITIVO / 2) || getGasolina() < (MAX_GASOLINA / 2)
-                || (getAlcool1() + getAlcool2()) > (MAX_ALCOOL / 2)) {
+                || (getAlcool1() + getAlcool2()) < (MAX_ALCOOL / 2)) {
             situacaoAtual = SITUACAO.SOBRAVISO;
         } else if (getAditivo() < (MAX_ADITIVO / 4) || getGasolina() < (MAX_GASOLINA / 4)
-                || (getAlcool1() + getAlcool2()) > (MAX_ALCOOL / 4)) {
+                || (getAlcool1() + getAlcool2()) < (MAX_ALCOOL / 4)) {
             situacaoAtual = SITUACAO.EMERGENCIA;
         } else {
             situacaoAtual = SITUACAO.NORMAL;
@@ -72,7 +72,7 @@ public class CentroDistribuicao {
     }
 
     private boolean validaÁlcool(int novoAlcool) {
-        if (novoAlcool > MAX_ALCOOL / 2)
+        if (novoAlcool > MAX_ALCOOL)
             return false;
         return true;
     }
@@ -98,6 +98,10 @@ public class CentroDistribuicao {
             defineSituacao();
             return getAditivo();
         }
+        if (qtdade > 0) {
+            return -21;
+        }
+
         return -1;
     }
 
@@ -113,56 +117,92 @@ public class CentroDistribuicao {
 
     public int[] encomendaCombustivel(int qtdade, TIPOPOSTO tipoPosto) {
         int[] tanqueAtual = new int[4];
-        getSituacao();
         switch (getSituacao()) {
             case NORMAL:
-                tAditivo = getAditivo() - (qtdade / 20);
-                tGasolina = getGasolina() - (qtdade * (7 / 10));
-                tAlcool1 = getAlcool1() - (qtdade / 8);
-                tAlcool2 = getAlcool2() - (qtdade / 8);
-                tanqueAtual[0] = getAditivo();
-                tanqueAtual[1] = getGasolina();
-                tanqueAtual[2] = getAlcool1();
-                tanqueAtual[3] = getAlcool2();
-                break;
-            case SOBRAVISO:
-                if (tipoPosto == TIPOPOSTO.COMUM) {
-                    tAditivo = getAditivo() - (qtdade / 40);
-                    tGasolina = getGasolina() - (qtdade * (7 / 20));
-                    tAlcool1 = getAlcool1() - (qtdade / 16);
-                    tAlcool2 = getAlcool2() - (qtdade / 16);
+                if (validaAditivo(getAditivo() - (qtdade / 20)) &&
+                        validaGasolina(getGasolina() - (qtdade / 10 * 7)) &&
+                        validaÁlcool((getAlcool1() + getAlcool2()) - (qtdade / 8))) {
+                    tAditivo -= (qtdade / 20);
+                    tGasolina -= ((qtdade / 10) * 7);
+                    tAlcool1 -= (qtdade / 8);
+                    tAlcool2 -= (qtdade / 8);
+
                     tanqueAtual[0] = getAditivo();
                     tanqueAtual[1] = getGasolina();
                     tanqueAtual[2] = getAlcool1();
                     tanqueAtual[3] = getAlcool2();
                 } else {
-                    tAditivo = getAditivo() - (qtdade / 20);
-                    tGasolina = getGasolina() - (qtdade * (7 / 10));
-                    tAlcool1 = getAlcool1() - (qtdade / 8);
-                    tAlcool2 = getAlcool2() - (qtdade / 8);
-                    tanqueAtual[0] = getAditivo();
-                    tanqueAtual[1] = getGasolina();
-                    tanqueAtual[2] = getAlcool1();
-                    tanqueAtual[3] = getAlcool2();
+                    tanqueAtual[0] = -7;
+                }
+
+                break;
+            case SOBRAVISO:
+                if (tipoPosto == TIPOPOSTO.COMUM) {
+
+                    if (validaAditivo(getAditivo() - (qtdade / 40)) &&
+                            validaGasolina(getGasolina() - (qtdade / 20 * 7)) &&
+                            validaÁlcool((getAlcool1() + getAlcool2()) - (qtdade / 8))) {
+                        tAditivo -= (qtdade / 40);
+                        tGasolina -= ((qtdade / 20) * 7);
+                        tAlcool1 -= (qtdade / 16);
+                        tAlcool2 -= (qtdade / 16);
+
+                        tanqueAtual[0] = getAditivo();
+                        tanqueAtual[1] = getGasolina();
+                        tanqueAtual[2] = getAlcool1();
+                        tanqueAtual[3] = getAlcool2();
+                    } else {
+                        tanqueAtual[0] = -7;
+                    }
+
+                } else {
+                    if (validaAditivo(getAditivo() - (qtdade / 20)) &&
+                            validaGasolina(getGasolina() - (qtdade / 10 * 7)) &&
+                            validaÁlcool((getAlcool1() + getAlcool2()) - (qtdade / 8))) {
+                        tAditivo -= (qtdade / 20);
+                        tGasolina -= ((qtdade / 10) * 7);
+                        tAlcool1 -= (qtdade / 8);
+                        tAlcool2 -= (qtdade / 8);
+
+                        tanqueAtual[0] = getAditivo();
+                        tanqueAtual[1] = getGasolina();
+                        tanqueAtual[2] = getAlcool1();
+                        tanqueAtual[3] = getAlcool2();
+                    } else {
+                        tanqueAtual[0] = -7;
+                    }
+
                 }
                 break;
             case EMERGENCIA:
                 if (tipoPosto == TIPOPOSTO.COMUM) {
                     tanqueAtual[0] = -14;
                 } else {
-                    tAditivo = getAditivo() - (qtdade / 40);
-                    tGasolina = getGasolina() - (qtdade * (7 / 20));
-                    tAlcool1 = getAlcool1() - (qtdade / 16);
-                    tAlcool2 = getAlcool2() - (qtdade / 16);
-                    tanqueAtual[0] = getAditivo();
-                    tanqueAtual[1] = getGasolina();
-                    tanqueAtual[2] = getAlcool1();
-                    tanqueAtual[3] = getAlcool2();
+                    if (validaAditivo(getAditivo() - (qtdade / 40)) &&
+                            validaGasolina(getGasolina() - (qtdade / 20 * 7)) &&
+                            validaÁlcool((getAlcool1() + getAlcool2()) - (qtdade / 8))) {
+                        tAditivo -= (qtdade / 40);
+                        tGasolina -= ((qtdade / 20) * 7);
+                        tAlcool1 -= (qtdade / 16);
+                        tAlcool2 -= (qtdade / 16);
+                        tanqueAtual[0] = getAditivo();
+                        tanqueAtual[1] = getGasolina();
+                        tanqueAtual[2] = getAlcool1();
+                        tanqueAtual[3] = getAlcool2();
+                    } else {
+                        tanqueAtual[0] = -7;
+                    }
                 }
                 break;
         }
-
+        System.out.println(toString());
         return tanqueAtual;
+    }
+
+    @Override
+    public String toString() {
+        return "CentroDistribuicao [tAditivo=" + tAditivo + ", tAlcool1=" + tAlcool1 + ", tAlcool2=" + tAlcool2
+                + ", tGasolina=" + tGasolina + "]";
     }
 
     public static void main(String[] args) {
